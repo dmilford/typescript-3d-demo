@@ -1,5 +1,4 @@
 import { Cube } from './programs/cube';
-import { Cube2 } from './programs/cube2';
 import { Color2D } from './programs/color_2d';
 import { Color2DGradient } from './programs/color_2d_gradient';
 import { Graph3D } from './programs/graph_3d';
@@ -36,7 +35,7 @@ function main() {
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
   const cube1 = new Cube(gl);
-  const cube2 = new Cube2(gl);
+  const cube2 = new Cube(gl);
   const color1 = new Color2D(gl);
   const colorGradient = new Color2DGradient(gl);
   const graph3D = new Graph3D(gl);
