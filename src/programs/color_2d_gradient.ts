@@ -36,14 +36,14 @@ export class Color2DGradient {
             u_transform: gl.getUniformLocation(this.program, "uTransform"),
         };
 
-        let vertices_rect: number[] = [
+        const vertices_rect: number[] = [
             0., 1., // x, y
             0., 0., // x, y
             1., 1., // x, y
             1., 0., // x, y
         ];
 
-        let indices_rect: number[] = [0, 1, 2, 2, 1, 3];
+        const indices_rect: number[] = [0, 1, 2, 2, 1, 3];
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.position);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices_rect), gl.STATIC_DRAW);
@@ -73,7 +73,7 @@ export class Color2DGradient {
         gl.vertexAttribPointer(this.attribLocations.color, 4, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(this.attribLocations.color);
 
-        let colors: number[] = [
+        const colors: number[] = [
             1., 0., 0., 1.,
             0., 1., 0., 1., 
             0., 0., 1., 1.,
@@ -84,7 +84,7 @@ export class Color2DGradient {
 
         gl.uniform1f(this.uniforms.u_opacity, 1);
 
-        let transform_mat = mat4.create();
+        const transform_mat = mat4.create();
         mat4.translate(transform_mat, transform_mat, [
             2. * left / canvas_width - 1.,
             2. * bottom / canvas_height - 1.,

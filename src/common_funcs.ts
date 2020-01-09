@@ -7,10 +7,10 @@ export interface PositionAndIndices {
 }
 
 export function get_position_grid_n_by_n(n: number): PositionAndIndices {
-    let n_plus_one = n + 1;
+    const n_plus_one = n + 1;
     const positions = new Array(3 * n_plus_one * n_plus_one); //This is much faster than creating an array by [] and then pushing into it.  https://jsperf.com/array-init-kk/19
     const indices = new Array(6 * n * n); //This is much faster than creating an array by [] and then pushing into it.  https://jsperf.com/array-init-kk/19
-    let square_size = 1 / n;
+    const square_size = 1 / n;
 
     for (let z = 0; z < n_plus_one; z++) {
         for (let x = 0; x < n_plus_one; x++) {
@@ -20,11 +20,11 @@ export function get_position_grid_n_by_n(n: number): PositionAndIndices {
             positions[start_pos_i + 2] = z * square_size;
 
             if (z < n && x < n) {
-                let start_index_i = 6 * (z * n + x);
-                let vertex_index_top_left = (z * n_plus_one + x);
-                let vertex_index_bottom_left = vertex_index_top_left + n_plus_one;
-                let vertex_index_top_right = vertex_index_top_left + 1;
-                let vertex_index_bottom_right = vertex_index_bottom_left + 1;
+                const start_index_i = 6 * (z * n + x);
+                const vertex_index_top_left = (z * n_plus_one + x);
+                const vertex_index_bottom_left = vertex_index_top_left + n_plus_one;
+                const vertex_index_top_right = vertex_index_top_left + 1;
+                const vertex_index_bottom_right = vertex_index_bottom_left + 1;
 
                 indices[start_index_i + 0] = vertex_index_top_left;
                 indices[start_index_i + 1] = vertex_index_bottom_left;
@@ -50,22 +50,22 @@ export function get_grid_normals(n: number, y_vals: number[]): number[] {
 
     for (let z = 0; z < points_per_row; z++) {
         for (let x = 0; x < points_per_row; x++) {
-            let y_val_index_a = z * points_per_row + x;
-            let return_var_start_index = 3 * y_val_index_a;
+            const y_val_index_a = z * points_per_row + x;
+            const return_var_start_index = 3 * y_val_index_a;
 
             if (z === n || x === n) {
                 return_var[return_var_start_index + 1] = 1.; //default
             } else {
-                let y_val_index_b = y_val_index_a + points_per_row;
-                let y_val_index_c = y_val_index_a + 1;
+                const y_val_index_b = y_val_index_a + points_per_row;
+                const y_val_index_c = y_val_index_a + 1;
                 
-                let x_val_1 = square_size * x;
-                let x_val_2 = x_val_1 + square_size;
+                const x_val_1 = square_size * x;
+                const x_val_2 = x_val_1 + square_size;
 
-                let z_val_1 = square_size * z;
-                let z_val_2 = z_val_1 + square_size;
+                const z_val_1 = square_size * z;
+                const z_val_2 = z_val_1 + square_size;
 
-                let normals = get_normal_vec(
+                const normals = get_normal_vec(
                     x_val_1,
                     y_vals[y_val_index_a],
                     z_val_1,
@@ -104,19 +104,19 @@ export function get_normal_vec(
     point_c_y: number,
     point_c_z: number,
 ): XYZ {
-    let u_x = point_b_x - point_a_x;
-    let u_y = point_b_y - point_a_y;
-    let u_z = point_b_z - point_a_z;
+    const u_x = point_b_x - point_a_x;
+    const u_y = point_b_y - point_a_y;
+    const u_z = point_b_z - point_a_z;
 
-    let v_x = point_c_x - point_a_x;
-    let v_y = point_c_y - point_a_y;
-    let v_z = point_c_z - point_a_z;
+    const v_x = point_c_x - point_a_x;
+    const v_y = point_c_y - point_a_y;
+    const v_z = point_c_z - point_a_z;
 
-    let normal_x = u_y * v_z - v_y * u_z;
-    let normal_y = -1. * (u_x * v_z - v_x * u_z);
-    let normal_z = u_x * v_y - v_x * u_y;
+    const normal_x = u_y * v_z - v_y * u_z;
+    const normal_y = -1. * (u_x * v_z - v_x * u_z);
+    const normal_z = u_x * v_y - v_x * u_y;
 
-    let normal_size = Math.sqrt(normal_x * normal_x + normal_y * normal_y + normal_z * normal_z);
+    const normal_size = Math.sqrt(normal_x * normal_x + normal_y * normal_y + normal_z * normal_z);
 
     return {
         x: normal_x / normal_size,
@@ -166,9 +166,9 @@ export function get_updated_3d_y_values(curr_time: number): number[] {
 
     for (let z = 0; z < point_count_per_row; z++) {
         for (let x = 0; x < point_count_per_row; x++) {
-            let use_y_index = z * point_count_per_row + x;
-            let scaled_x = frequency_scale * (x - half_grid) / half_grid;
-            let scaled_z = frequency_scale * (z - half_grid) / half_grid;
+            const use_y_index = z * point_count_per_row + x;
+            const scaled_x = frequency_scale * (x - half_grid) / half_grid;
+            const scaled_z = frequency_scale * (z - half_grid) / half_grid;
             y_vals[use_y_index] = 0.5 + 0.5 * y_scale * Math.sin((Math.sqrt(scaled_x * scaled_x + scaled_z * scaled_z) + sin_offset));
         }
     }
@@ -195,7 +195,6 @@ export function projection_and_rotation_normal_for_3d_in_2d_layout(
     const aspect = canvas_width / canvas_height;
     let matrix = perspective(FIELD_OF_VIEW, aspect, Z_NEAR, Z_FAR);
 
-    let modelViewMatrix = mat4.create();
     matrix = translate(matrix, 
         -aspect + (use_scale / 2) + aspect * 2 * (left / canvas_width),
         -1 + (use_scale / 2) + 2 * (bottom / canvas_height),
@@ -207,7 +206,7 @@ export function projection_and_rotation_normal_for_3d_in_2d_layout(
     matrix = translate(matrix, -0.5, -0.5, -0.5);
 
     const normalMatrix = mat4.create();
-    mat4.invert(normalMatrix, modelViewMatrix);
+    mat4.invert(normalMatrix, normalMatrix);
     mat4.transpose(normalMatrix, normalMatrix);
 
     return { 
@@ -291,6 +290,15 @@ export function translation(tx: number, ty: number, tz: number): number[] {
         tx, ty, tz, 1,
     ];
 }
+
+export function transpose(m: number[]) {
+    return [
+      m[0], m[4], m[8], m[12],
+      m[1], m[5], m[9], m[13],
+      m[2], m[6], m[10], m[14],
+      m[3], m[7], m[11], m[15],
+    ];
+  }
 
 export function xRotation(angleInRadians: number): number[] {
     const c = Math.cos(angleInRadians);

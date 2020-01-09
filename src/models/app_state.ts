@@ -27,11 +27,11 @@ export const UNLOADED_APP_STATE: AppState = {
 }
 
 export function getUpdatedAppStateFromCanvasResize(currState: AppState, canvasHeight: number, canvasWidth: number): AppState {
-    let min_height_width = Math.min(canvasHeight, canvasWidth);
-    let display_size = 0.9 * min_height_width;
-    let half_display_size = display_size / 2;
-    let half_canvas_height = canvasHeight / 2;
-    let half_canvas_width = canvasWidth / 2;
+    const min_height_width = Math.min(canvasHeight, canvasWidth);
+    const display_size = 0.9 * min_height_width;
+    const half_display_size = display_size / 2;
+    const half_canvas_height = canvasHeight / 2;
+    const half_canvas_width = canvasWidth / 2;
 
     return {
         ...currState,
@@ -46,13 +46,13 @@ export function getUpdatedAppStateFromCanvasResize(currState: AppState, canvasHe
 }
 
 export function getUpdatedStateFromMouseMove(currState: AppState, x: number, y: number, mouse_down: boolean): AppState {
-    let inverted_y = currState.canvasHeight - y;
-    let x_delta = x - currState.mouse_x;
-    let y_delta = inverted_y - currState.mouse_y;
-    let rotation_x_delta = mouse_down 
+    const inverted_y = currState.canvasHeight - y;
+    const x_delta = x - currState.mouse_x;
+    const y_delta = inverted_y - currState.mouse_y;
+    const rotation_x_delta = mouse_down 
         ? Math.PI * y_delta / currState.canvasHeight
         : 0;
-    let rotation_y_delta = mouse_down 
+    const rotation_y_delta = mouse_down 
         ? Math.PI * x_delta / currState.canvasWidth
         : 0;
 

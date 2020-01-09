@@ -58,7 +58,7 @@ function main() {
       }
       const elapsedTime = Date.now() - initialTime;
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-      let cubeRotation = elapsedTime / 1000;
+      const cubeRotation = elapsedTime / 1000;
 
       color1.render(gl, 
         currAppState.controlBottom, 

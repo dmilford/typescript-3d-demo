@@ -32,7 +32,7 @@ export class Color2D {
             u_transform:  gl.getUniformLocation(this.program, 'uTransform'),
         }
 
-        let vertices_rect: number[] = [
+        const vertices_rect: number[] = [
             0., 1., // x, y
             0., 0., // x, y
             1., 1., // x, y
@@ -71,7 +71,7 @@ export class Color2D {
 
         gl.uniform1f(this.uniforms.u_opacity, 1);
 
-        let transform_mat = mat4.create();
+        const transform_mat = mat4.create();
         mat4.translate(transform_mat, transform_mat, [
             2. * left / canvas_width - 1.,
             2. * bottom / canvas_height - 1.,

@@ -47,7 +47,7 @@ export class Graph3D {
             u_opacity: gl.getUniformLocation(this.program, "uOpacity"),
         }
 
-        let positions_and_indices = get_position_grid_n_by_n(GRID_SIZE);
+        const positions_and_indices = get_position_grid_n_by_n(GRID_SIZE);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.position);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions_and_indices.positions), gl.STATIC_DRAW);
 
@@ -75,7 +75,7 @@ export class Graph3D {
     ) => {
         gl.useProgram(this.program);
 
-        let pAndRN = projection_and_rotation_normal_for_3d_in_2d_layout(bottom, top, left, right, canvas_height, canvas_width, rotation_angle_x_axis, rotation_angle_y_axis);
+        const pAndRN = projection_and_rotation_normal_for_3d_in_2d_layout(bottom, top, left, right, canvas_height, canvas_width, rotation_angle_x_axis, rotation_angle_y_axis);
 
         gl.uniformMatrix4fv(this.uniforms.u_projection, false, new Float32Array(pAndRN.projection));
         gl.uniformMatrix4fv(this.uniforms.u_normals_rotation, false, new Float32Array(pAndRN.rotationNormal));
@@ -94,7 +94,7 @@ export class Graph3D {
         gl.vertexAttribPointer(this.attribLocations.vertexNormal, 3, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(this.attribLocations.vertexNormal);
 
-        let normals_vals = get_grid_normals(GRID_SIZE, y_vals);
+        const normals_vals = get_grid_normals(GRID_SIZE, y_vals);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals_vals), gl.DYNAMIC_DRAW);
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.buffers.indices);

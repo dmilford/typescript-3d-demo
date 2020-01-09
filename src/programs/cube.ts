@@ -103,9 +103,9 @@ export class Cube {
 
         // Convert the array of colors into a table for all the vertices.
 
-        var colors: number[] = [];
+        let colors: number[] = [];
 
-        for (var j = 0; j < faceColors.length; ++j) {
+        for (let j = 0; j < faceColors.length; ++j) {
             const c = faceColors[j];
 
             // Repeat each color four times for the four vertices of the face
@@ -114,7 +114,7 @@ export class Cube {
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.color);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-    };
+    }
 
     render = (gl: WebGLRenderingContext, cubeRotation: number, xTranslation: number) => {
         const aspect = (gl.canvas as HTMLCanvasElement).clientWidth / (gl.canvas as HTMLCanvasElement).clientHeight;
