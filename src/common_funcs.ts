@@ -1,4 +1,5 @@
-import { GRID_SIZE } from './constants';
+import { GRID_SIZE, FIELD_OF_VIEW, Z_NEAR, Z_FAR, Z_PLANE } from './constants';
+import { mat4 } from 'gl-matrix';
 
 export interface PositionAndIndices {
     positions: number[],
@@ -168,17 +169,52 @@ export function get_updated_3d_y_values(curr_time: number): number[] {
             let use_y_index = z * point_count_per_row + x;
             let scaled_x = frequency_scale * (x - half_grid) / half_grid;
             let scaled_z = frequency_scale * (z - half_grid) / half_grid;
-            y_vals[use_y_index] = y_scale * Math.sin((Math.sqrt(scaled_x * scaled_x + scaled_z * scaled_z) + sin_offset));
+            y_vals[use_y_index] = 0.5 + 0.5 * y_scale * Math.sin((Math.sqrt(scaled_x * scaled_x + scaled_z * scaled_z) + sin_offset));
         }
     }
 
     return y_vals;
 }
 
+export interface ProjectionAndRotationNormal {
+    projection: number[],
+    rotationNormal: number[],
+}
 
+export function projection_and_rotation_normal_for_3d_in_2d_layout(
+    bottom: number,
+    top: number,
+    left: number,
+    right: number,
+    canvas_height: number,
+    canvas_width: number,
+    rotation_angle_x_axis: number,
+    rotation_angle_y_axis: number,
+): ProjectionAndRotationNormal {
+    const use_scale = 2 * (top - bottom) / canvas_height;
+    const aspect = canvas_width / canvas_height;
+    let matrix = perspective(FIELD_OF_VIEW, aspect, Z_NEAR, Z_FAR);
 
+    let modelViewMatrix = mat4.create();
+    matrix = translate(matrix, 
+        -aspect + (use_scale / 2) + aspect * 2 * (left / canvas_width),
+        -1 + (use_scale / 2) + 2 * (bottom / canvas_height),
+        Z_PLANE,
+    );
+    matrix = xRotate(matrix, rotation_angle_x_axis);
+    matrix = yRotate(matrix, rotation_angle_y_axis);
+    matrix = scale(matrix, use_scale ,use_scale, use_scale);
+    matrix = translate(matrix, -0.5, -0.5, -0.5);
 
+    const normalMatrix = mat4.create();
+    mat4.invert(normalMatrix, modelViewMatrix);
+    mat4.transpose(normalMatrix, normalMatrix);
 
+    return { 
+        projection: matrix,
+        rotationNormal: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    };
+}
 
 export function perspective(fieldOfViewInRadians: number, aspect: number, near: number, far: number) {
     const f = 1.0 / Math.tan(fieldOfViewInRadians / 2);

@@ -2,19 +2,11 @@ import {
     linkProgramToShaders, 
     get_position_grid_n_by_n, 
     get_grid_normals,
-    multiply,
-    perspective,
-    scale,
-    translate,
-    xRotate,
-    xRotation,
-    yRotate,
-    yRotation,
+    projection_and_rotation_normal_for_3d_in_2d_layout
 } from '../common_funcs';
 import * as vertex from '../shaders/vertex/graph_3d';
 import * as fragment from '../shaders/fragment/varying_color_from_vertex';
-import { GRID_SIZE, FIELD_OF_VIEW, Z_NEAR, Z_FAR, Z_PLANE } from '../constants';
-import { mat4 } from 'gl-matrix';
+import { GRID_SIZE} from '../constants';
 
 export class Graph3D {
     program: WebGLProgram;
@@ -83,33 +75,10 @@ export class Graph3D {
     ) => {
         gl.useProgram(this.program);
 
-        const scale_x = (right - left) / canvas_width;
-        const scale_y = (top - bottom) / canvas_height;
-        const use_scale = scale_y;
-        const aspect = canvas_width / canvas_height;
-        var matrix = perspective(FIELD_OF_VIEW, aspect, Z_NEAR, Z_FAR);
-    
-        // matrix = translate(matrix, 
-        //     2. * left / canvas_width,
-        //     2. * bottom / canvas_height,
-        //     Z_PLANE,
-        // );
-        matrix = translate(matrix, 
-            -0.5,
-            0,
-            Z_PLANE,
-        );
-        matrix = xRotate(matrix, rotation_angle_x_axis);
-        matrix = yRotate(matrix, rotation_angle_y_axis);
-        matrix = scale(matrix, use_scale ,use_scale, use_scale);
+        let pAndRN = projection_and_rotation_normal_for_3d_in_2d_layout(bottom, top, left, right, canvas_height, canvas_width, rotation_angle_x_axis, rotation_angle_y_axis);
 
-        let modelViewMatrix = mat4.create();
-        const normalMatrix = mat4.create();
-        mat4.invert(normalMatrix, modelViewMatrix);
-        mat4.transpose(normalMatrix, normalMatrix);
-
-        gl.uniformMatrix4fv(this.uniforms.u_projection, false, new Float32Array(matrix));
-        gl.uniformMatrix4fv(this.uniforms.u_normals_rotation, false, normalMatrix);
+        gl.uniformMatrix4fv(this.uniforms.u_projection, false, new Float32Array(pAndRN.projection));
+        gl.uniformMatrix4fv(this.uniforms.u_normals_rotation, false, new Float32Array(pAndRN.rotationNormal));
         gl.uniform1f(this.uniforms.u_opacity, 1.0);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.position);

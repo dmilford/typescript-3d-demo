@@ -43,7 +43,7 @@ function main() {
 
   function render() {
     const currTime = Date.now();
-
+    
     if (currTime >= lastDrawTime + FPS_THROTTLE) {
       lastDrawTime = currTime;
       if (window.innerHeight !== canvas.height || window.innerWidth !== canvas.width) {
