@@ -1,7 +1,6 @@
-import { linkProgramToShaders } from '../common_funcs';
+import { linkProgramToShaders, get_projection_2d } from '../common_funcs';
 import * as vertex from '../shaders/vertex/color_2d';
 import * as fragment from '../shaders/fragment/color_2d';
-import { mat4 } from 'gl-matrix';
 
 export class Color2D {
     program: WebGLProgram;
@@ -71,18 +70,7 @@ export class Color2D {
 
         gl.uniform1f(this.uniforms.u_opacity, 1);
 
-        const transform_mat = mat4.create();
-        mat4.translate(transform_mat, transform_mat, [
-            2. * left / canvas_width - 1.,
-            2. * bottom / canvas_height - 1.,
-            0,
-        ]);
-        mat4.scale(transform_mat, transform_mat, [
-            2. * (right - left) / canvas_width,
-            2. * (top - bottom) / canvas_height,
-            0,
-        ]);
-        gl.uniformMatrix4fv(this.uniforms.u_transform, false, transform_mat);
+        gl.uniformMatrix4fv(this.uniforms.u_transform, false, get_projection_2d(bottom, top, left, right, canvas_height, canvas_width));
 
         gl.drawArrays(gl.TRIANGLES, 0, this.rect_vertice_ary_length / 2);
     }

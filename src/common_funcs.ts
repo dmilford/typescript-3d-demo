@@ -181,7 +181,29 @@ export interface ProjectionAndRotationNormal {
     rotationNormal: number[],
 }
 
-export function projection_and_rotation_normal_for_3d_in_2d_layout(
+export function get_projection_2d(
+    bottom: number,
+    top: number,
+    left: number,
+    right: number,
+    canvas_height: number,
+    canvas_width: number,
+): number[] {
+    const translation_mat = translation(
+        2. * left / canvas_width - 1.,
+        2. * bottom / canvas_height - 1.,
+        0,
+    );
+    const scaling_mat = scaling(
+        2. * (right - left) / canvas_width,
+        2. * (top - bottom) / canvas_height,
+        0,
+    );
+
+    return multiply(translation_mat, scaling_mat);
+}
+
+export function get_projection_and_rotation_normal_for_3d_in_2d_layout(
     bottom: number,
     top: number,
     left: number,
@@ -190,11 +212,28 @@ export function projection_and_rotation_normal_for_3d_in_2d_layout(
     canvas_width: number,
     rotation_angle_x_axis: number,
     rotation_angle_y_axis: number,
-): ProjectionAndRotationNormal {
-    const use_scale = 2 * (top - bottom) / canvas_height;
+): ProjectionAndRotationNormal {    
     const aspect = canvas_width / canvas_height;
     const perspective_matrix = perspective(FIELD_OF_VIEW, aspect, Z_NEAR, Z_FAR);
+    const modelViewMatrix = get_3d_model_view_matrix(bottom, top, left, right, canvas_height, canvas_width, rotation_angle_x_axis, rotation_angle_y_axis);
+    return { 
+        projection: multiply(perspective_matrix, modelViewMatrix),
+        rotationNormal: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]// transpose(inverse_4x4(modelViewMatrix))
+    };
+}
 
+export function get_3d_model_view_matrix(
+    bottom: number,
+    top: number,
+    left: number,
+    right: number,
+    canvas_height: number,
+    canvas_width: number,
+    rotation_angle_x_axis: number,
+    rotation_angle_y_axis: number,
+): number[] {
+    const aspect = canvas_width / canvas_height;
+    const use_scale = 2 * (top - bottom) / canvas_height;
     let modelViewMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
     modelViewMatrix = translate(modelViewMatrix, 
         -aspect + (use_scale / 2) + aspect * 2 * (left / canvas_width),
@@ -206,10 +245,7 @@ export function projection_and_rotation_normal_for_3d_in_2d_layout(
     modelViewMatrix = scale(modelViewMatrix, use_scale ,use_scale, use_scale);
     modelViewMatrix = translate(modelViewMatrix, -0.5, -0.5, -0.5);
 
-    return { 
-        projection: multiply(perspective_matrix, modelViewMatrix),
-        rotationNormal: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]// transpose(inverse_4x4(modelViewMatrix))
-    };
+    return modelViewMatrix;
 }
 
 export function perspective(fieldOfViewInRadians: number, aspect: number, near: number, far: number) {

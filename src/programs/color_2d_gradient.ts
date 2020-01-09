@@ -1,7 +1,6 @@
-import { linkProgramToShaders } from '../common_funcs';
+import { linkProgramToShaders, get_projection_2d } from '../common_funcs';
 import * as vertex from '../shaders/vertex/color_2d_gradient';
 import * as fragment from '../shaders/fragment/varying_color_from_vertex';
-import { mat4 } from 'gl-matrix';
 
 export class Color2DGradient {
     program: WebGLProgram;
@@ -84,18 +83,7 @@ export class Color2DGradient {
 
         gl.uniform1f(this.uniforms.u_opacity, 1);
 
-        const transform_mat = mat4.create();
-        mat4.translate(transform_mat, transform_mat, [
-            2. * left / canvas_width - 1.,
-            2. * bottom / canvas_height - 1.,
-            0,
-        ]);
-        mat4.scale(transform_mat, transform_mat, [
-            2. * (right - left) / canvas_width,
-            2. * (top - bottom) / canvas_height,
-            0,
-        ]);
-        gl.uniformMatrix4fv(this.uniforms.u_transform, false, transform_mat);
+        gl.uniformMatrix4fv(this.uniforms.u_transform, false, get_projection_2d(bottom, top, left, right, canvas_height, canvas_width));
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.buffers.index);
 

@@ -1,8 +1,7 @@
 import * as vertex from '../shaders/vertex/cube';
 import * as fragment from '../shaders/fragment/cube';
-import { linkProgramToShaders } from '../common_funcs';
-import { mat4 } from 'gl-matrix';
-import { FIELD_OF_VIEW, Z_FAR, Z_NEAR, Z_PLANE } from '../constants';
+import { linkProgramToShaders, perspective, get_3d_model_view_matrix } from '../common_funcs';
+import { FIELD_OF_VIEW, Z_FAR, Z_NEAR } from '../constants';
 
 export class Cube {
     program: WebGLProgram;
@@ -118,13 +117,8 @@ export class Cube {
 
     render = (gl: WebGLRenderingContext, cubeRotation: number, xTranslation: number) => {
         const aspect = (gl.canvas as HTMLCanvasElement).clientWidth / (gl.canvas as HTMLCanvasElement).clientHeight;
-        const projectionMatrix = mat4.create();
-        mat4.perspective(projectionMatrix, FIELD_OF_VIEW, aspect, Z_NEAR, Z_FAR);
-
-        const modelViewMatrix = mat4.create();
-        mat4.translate(modelViewMatrix, modelViewMatrix, [xTranslation, 0.0, -6.0]);
-        mat4.rotate(modelViewMatrix, modelViewMatrix, cubeRotation, [0, 0, 1]);
-        mat4.rotate(modelViewMatrix, modelViewMatrix, cubeRotation * .7, [0, 1, 0]);
+        const perspectiveMatrix = perspective(FIELD_OF_VIEW, aspect, Z_NEAR, Z_FAR);
+        const modelViewMatrix = get_3d_model_view_matrix(400, 500, 400, 500, (gl.canvas as HTMLCanvasElement).clientHeight, (gl.canvas as HTMLCanvasElement).clientWidth, cubeRotation, 0.7 * cubeRotation);
 
         {
             const numComponents = 3;
@@ -168,12 +162,12 @@ export class Cube {
         gl.uniformMatrix4fv(
             this.uniformLocations.projectionMatrix,
             false,
-            projectionMatrix);
+            new Float32Array(perspectiveMatrix));
 
         gl.uniformMatrix4fv(
             this.uniformLocations.modelViewMatrix,
             false,
-            modelViewMatrix);
+            new Float32Array(modelViewMatrix));
 
         {
             const vertexCount = 36;
