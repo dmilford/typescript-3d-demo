@@ -77,7 +77,7 @@ export class Graph3D {
 
         const pAndRN = get_projection_and_normals_for_3d_in_2d_layout(bottom, top, left, right, canvas_height, canvas_width, rotation_angle_x_axis, rotation_angle_y_axis);
 
-        gl.uniformMatrix4fv(this.uniforms.u_projection, false, new Float32Array(pAndRN.projection));
+        gl.uniformMatrix4fv(this.uniforms.u_projection, false, pAndRN.projection);
         gl.uniformMatrix4fv(this.uniforms.u_normals_rotation, false, pAndRN.normals);
         gl.uniform1f(this.uniforms.u_opacity, 1.0);
 

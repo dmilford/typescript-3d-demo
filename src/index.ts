@@ -27,14 +27,19 @@ function main() {
 
   const FPS_THROTTLE = 1000.0 / 30.0; // milliseconds / frames
   const initialTime = Date.now();
+  const allowSemiTransparent = true;
   let lastDrawTime = -1;// In milliseconds
 
   gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
   gl.clearDepth(1.0);                 // Clear everything
-  // gl.enable(gl.DEPTH_TEST);           // Enable depth testing
-  // gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  if (allowSemiTransparent) {
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  }
+  else {
+    gl.enable(gl.DEPTH_TEST);           // Enable depth testing
+    gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
+  }
 
   const cube1 = new Cube(gl);
   const cube2 = new Cube(gl);
@@ -90,8 +95,8 @@ function main() {
         currAppState.rotation_y_axis,
         get_updated_3d_y_values(currTime)
       );
-      // cube1.render(gl, cubeRotation, -1);
-      // cube2.render(gl, 1.5 * cubeRotation, 2);
+      // cube1.render(gl, cubeRotation, currAppState.canvasHeight, currAppState.canvasWidth);
+      // cube2.render(gl, 1.5 * cubeRotation, currAppState.canvasHeight, currAppState.canvasWidth);
 
       //cubeLightingAndTexture.render(gl, currAppState.rotation_x_axis, currAppState.rotation_y_axis, currAppState.canvasHeight, currAppState.canvasWidth);
     }

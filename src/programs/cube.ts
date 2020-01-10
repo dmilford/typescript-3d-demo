@@ -1,7 +1,8 @@
 import * as vertex from '../shaders/vertex/cube';
 import * as fragment from '../shaders/fragment/cube';
-import { linkProgramToShaders, perspective, get_3d_model_view_matrix } from '../common_funcs';
-import { FIELD_OF_VIEW, Z_FAR, Z_NEAR } from '../constants';
+import { linkProgramToShaders, get_projection_and_normals_for_3d_in_2d_layout } from '../common_funcs';
+import { FIELD_OF_VIEW_Y, Z_FAR, Z_NEAR } from '../constants';
+import { mat4 } from 'gl-matrix';
 
 export class Cube {
     program: WebGLProgram;
@@ -16,7 +17,6 @@ export class Cube {
     };
     uniformLocations: {
       projectionMatrix: WebGLUniformLocation,
-      modelViewMatrix: WebGLUniformLocation,
     };
 
     constructor(gl: WebGLRenderingContext) {
@@ -32,7 +32,6 @@ export class Cube {
         }
         this.uniformLocations = {
             projectionMatrix: gl.getUniformLocation(this.program, 'uProjectionMatrix'),
-            modelViewMatrix: gl.getUniformLocation(this.program, 'uModelViewMatrix'),
         };
         
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.position);
@@ -115,11 +114,8 @@ export class Cube {
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
     }
 
-    render = (gl: WebGLRenderingContext, cubeRotation: number, xTranslation: number) => {
-        const aspect = (gl.canvas as HTMLCanvasElement).clientWidth / (gl.canvas as HTMLCanvasElement).clientHeight;
-        const perspectiveMatrix = perspective(FIELD_OF_VIEW, aspect, Z_NEAR, Z_FAR);
-        const modelViewMatrix = get_3d_model_view_matrix(400, 500, 400, 500, (gl.canvas as HTMLCanvasElement).clientHeight, (gl.canvas as HTMLCanvasElement).clientWidth, cubeRotation, 0.7 * cubeRotation);
-
+    render = (gl: WebGLRenderingContext, cubeRotation: number, canvasHeight: number, canvasWidth: number) => {
+        const projAndNormal = get_projection_and_normals_for_3d_in_2d_layout(400, 500, 400, 500, canvasHeight, canvasWidth, cubeRotation, 0.7 * cubeRotation);
         {
             const numComponents = 3;
             const type = gl.FLOAT;
@@ -162,12 +158,7 @@ export class Cube {
         gl.uniformMatrix4fv(
             this.uniformLocations.projectionMatrix,
             false,
-            new Float32Array(perspectiveMatrix));
-
-        gl.uniformMatrix4fv(
-            this.uniformLocations.modelViewMatrix,
-            false,
-            new Float32Array(modelViewMatrix));
+            projAndNormal.projection);
 
         {
             const vertexCount = 36;
