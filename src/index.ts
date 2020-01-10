@@ -2,8 +2,10 @@ import { Cube } from './programs/cube';
 import { Color2D } from './programs/color_2d';
 import { Color2DGradient } from './programs/color_2d_gradient';
 import { Graph3D } from './programs/graph_3d';
+import { CubeLighting } from './programs/cube_lighting';
 import { AppState, UNLOADED_APP_STATE, getUpdatedAppStateFromCanvasResize, getUpdatedStateFromMouseMove } from './models/app_state';
 import { get_updated_3d_y_values } from './common_funcs';
+import './img/cubetexture.png';
 
 main();
 
@@ -39,6 +41,7 @@ function main() {
   const color1 = new Color2D(gl);
   const colorGradient = new Color2DGradient(gl);
   const graph3D = new Graph3D(gl);
+  const cubeLightingAndTexture = new CubeLighting(gl);
 
   function render() {
     const currTime = Date.now();
@@ -60,22 +63,22 @@ function main() {
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       const cubeRotation = elapsedTime / 1000;
 
-      color1.render(gl, 
-        currAppState.controlBottom, 
-        currAppState.controlTop, 
-        currAppState.controlLeft, 
-        currAppState.controlRight, 
-        currAppState.canvasHeight, 
-        currAppState.canvasWidth
-      );
-      colorGradient.render(gl, 
-        currAppState.controlBottom + 20, 
-        currAppState.controlTop - 20, 
-        currAppState.controlLeft + 20, 
-        currAppState.controlRight - 20, 
-        currAppState.canvasHeight, 
-        currAppState.canvasWidth
-      );
+      // color1.render(gl, 
+      //   currAppState.controlBottom, 
+      //   currAppState.controlTop, 
+      //   currAppState.controlLeft, 
+      //   currAppState.controlRight, 
+      //   currAppState.canvasHeight, 
+      //   currAppState.canvasWidth
+      // );
+      // colorGradient.render(gl, 
+      //   currAppState.controlBottom + 20, 
+      //   currAppState.controlTop - 20, 
+      //   currAppState.controlLeft + 20, 
+      //   currAppState.controlRight - 20, 
+      //   currAppState.canvasHeight, 
+      //   currAppState.canvasWidth
+      // );
       graph3D.render(gl,
         currAppState.controlBottom, 
         currAppState.controlTop, 
@@ -89,6 +92,8 @@ function main() {
       );
       // cube1.render(gl, cubeRotation, -1);
       // cube2.render(gl, 1.5 * cubeRotation, 2);
+
+      //cubeLightingAndTexture.render(gl, currAppState.rotation_x_axis, currAppState.rotation_y_axis, currAppState.canvasHeight, currAppState.canvasWidth);
     }
 
     requestAnimationFrame(render);
@@ -108,4 +113,3 @@ function main() {
 
   requestAnimationFrame(render);
 }
-

@@ -2,7 +2,7 @@ import {
     linkProgramToShaders, 
     get_position_grid_n_by_n, 
     get_grid_normals,
-    get_projection_and_rotation_normal_for_3d_in_2d_layout
+    get_projection_and_normals_for_3d_in_2d_layout
 } from '../common_funcs';
 import * as vertex from '../shaders/vertex/graph_3d';
 import * as fragment from '../shaders/fragment/varying_color_from_vertex';
@@ -75,10 +75,10 @@ export class Graph3D {
     ) => {
         gl.useProgram(this.program);
 
-        const pAndRN = get_projection_and_rotation_normal_for_3d_in_2d_layout(bottom, top, left, right, canvas_height, canvas_width, rotation_angle_x_axis, rotation_angle_y_axis);
+        const pAndRN = get_projection_and_normals_for_3d_in_2d_layout(bottom, top, left, right, canvas_height, canvas_width, rotation_angle_x_axis, rotation_angle_y_axis);
 
         gl.uniformMatrix4fv(this.uniforms.u_projection, false, new Float32Array(pAndRN.projection));
-        gl.uniformMatrix4fv(this.uniforms.u_normals_rotation, false, new Float32Array(pAndRN.rotationNormal));
+        gl.uniformMatrix4fv(this.uniforms.u_normals_rotation, false, pAndRN.normals);
         gl.uniform1f(this.uniforms.u_opacity, 1.0);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.position);

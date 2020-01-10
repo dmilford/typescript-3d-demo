@@ -59,11 +59,11 @@ export function get_grid_normals(n: number, y_vals: number[]): number[] {
                 const y_val_index_b = y_val_index_a + points_per_row;
                 const y_val_index_c = y_val_index_a + 1;
                 
-                const x_val_1 = square_size * x;
-                const x_val_2 = x_val_1 + square_size;
+                const x_val_1 = 0;
+                const x_val_2 = square_size;
 
-                const z_val_1 = square_size * z;
-                const z_val_2 = z_val_1 + square_size;
+                const z_val_1 = 0
+                const z_val_2 = square_size;
 
                 const normals = get_normal_vec(
                     x_val_1,
@@ -176,11 +176,6 @@ export function get_updated_3d_y_values(curr_time: number): number[] {
     return y_vals;
 }
 
-export interface ProjectionAndRotationNormal {
-    projection: number[],
-    rotationNormal: number[],
-}
-
 export function get_projection_2d(
     bottom: number,
     top: number,
@@ -203,7 +198,12 @@ export function get_projection_2d(
     return multiply(translation_mat, scaling_mat);
 }
 
-export function get_projection_and_rotation_normal_for_3d_in_2d_layout(
+export interface ProjectionAndRotationNormal {
+    projection: number[],
+    normals: mat4,
+}
+
+export function get_projection_and_normals_for_3d_in_2d_layout(
     bottom: number,
     top: number,
     left: number,
@@ -216,9 +216,32 @@ export function get_projection_and_rotation_normal_for_3d_in_2d_layout(
     const aspect = canvas_width / canvas_height;
     const perspective_matrix = perspective(FIELD_OF_VIEW, aspect, Z_NEAR, Z_FAR);
     const modelViewMatrix = get_3d_model_view_matrix(bottom, top, left, right, canvas_height, canvas_width, rotation_angle_x_axis, rotation_angle_y_axis);
+    
+    let normals = mat4.fromValues(
+        modelViewMatrix[0],
+        modelViewMatrix[1],
+        modelViewMatrix[2],
+        modelViewMatrix[3],
+        modelViewMatrix[4],
+        modelViewMatrix[5],
+        modelViewMatrix[6],
+        modelViewMatrix[7],
+        modelViewMatrix[8],
+        modelViewMatrix[9],
+        modelViewMatrix[10],
+        modelViewMatrix[11],
+        modelViewMatrix[12],
+        modelViewMatrix[13],
+        modelViewMatrix[14],
+        modelViewMatrix[15],
+    );
+
+    mat4.invert(normals, normals);
+    mat4.transpose(normals, normals);
+
     return { 
         projection: multiply(perspective_matrix, modelViewMatrix),
-        rotationNormal: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]// transpose(inverse_4x4(modelViewMatrix))
+        normals: normals //transpose(inverse_4x4(modelViewMatrix))
     };
 }
 
@@ -324,15 +347,6 @@ export function translation(tx: number, ty: number, tz: number): number[] {
     ];
 }
 
-export function transpose(m: number[]) {
-    return [
-      m[0], m[4], m[8], m[12],
-      m[1], m[5], m[9], m[13],
-      m[2], m[6], m[10], m[14],
-      m[3], m[7], m[11], m[15],
-    ];
-  }
-
 export function xRotation(angleInRadians: number): number[] {
     const c = Math.cos(angleInRadians);
     const s = Math.sin(angleInRadians);
@@ -398,72 +412,52 @@ export function scale(m: number[], sx: number, sy: number, sz: number): number[]
     return multiply(m, scaling(sx, sy, sz));
 }
 
-function inverse_4x4(m: number[]): number[] {
-    const dst = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    const m00 = m[0 * 4 + 0];
-    const m01 = m[0 * 4 + 1];
-    const m02 = m[0 * 4 + 2];
-    const m03 = m[0 * 4 + 3];
-    const m10 = m[1 * 4 + 0];
-    const m11 = m[1 * 4 + 1];
-    const m12 = m[1 * 4 + 2];
-    const m13 = m[1 * 4 + 3];
-    const m20 = m[2 * 4 + 0];
-    const m21 = m[2 * 4 + 1];
-    const m22 = m[2 * 4 + 2];
-    const m23 = m[2 * 4 + 3];
-    const m30 = m[3 * 4 + 0];
-    const m31 = m[3 * 4 + 1];
-    const m32 = m[3 * 4 + 2];
-    const m33 = m[3 * 4 + 3];
-    const tmp_0  = m22 * m33;
-    const tmp_1  = m32 * m23;
-    const tmp_2  = m12 * m33;
-    const tmp_3  = m32 * m13;
-    const tmp_4  = m12 * m23;
-    const tmp_5  = m22 * m13;
-    const tmp_6  = m02 * m33;
-    const tmp_7  = m32 * m03;
-    const tmp_8  = m02 * m23;
-    const tmp_9  = m22 * m03;
-    const tmp_10 = m02 * m13;
-    const tmp_11 = m12 * m03;
-    const tmp_12 = m20 * m31;
-    const tmp_13 = m30 * m21;
-    const tmp_14 = m10 * m31;
-    const tmp_15 = m30 * m11;
-    const tmp_16 = m10 * m21;
-    const tmp_17 = m20 * m11;
-    const tmp_18 = m00 * m31;
-    const tmp_19 = m30 * m01;
-    const tmp_20 = m00 * m21;
-    const tmp_21 = m20 * m01;
-    const tmp_22 = m00 * m11;
-    const tmp_23 = m10 * m01;
+export function loadTexture(gl: WebGLRenderingContext, url: string) {
+  const texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture);
 
-    const t0 = (tmp_0 * m11 + tmp_3 * m21 + tmp_4 * m31) - (tmp_1 * m11 + tmp_2 * m21 + tmp_5 * m31);
-    const t1 = (tmp_1 * m01 + tmp_6 * m21 + tmp_9 * m31) - (tmp_0 * m01 + tmp_7 * m21 + tmp_8 * m31);
-    const t2 = (tmp_2 * m01 + tmp_7 * m11 + tmp_10 * m31) - (tmp_3 * m01 + tmp_6 * m11 + tmp_11 * m31);
-    const t3 = (tmp_5 * m01 + tmp_8 * m11 + tmp_11 * m21) - (tmp_4 * m01 + tmp_9 * m11 + tmp_10 * m21);
+  // Because images have to be download over the internet
+  // they might take a moment until they are ready.
+  // Until then put a single pixel in the texture so we can
+  // use it immediately. When the image has finished downloading
+  // we'll update the texture with the contents of the image.
+  const level = 0;
+  const internalFormat = gl.RGBA;
+  const width = 1;
+  const height = 1;
+  const border = 0;
+  const srcFormat = gl.RGBA;
+  const srcType = gl.UNSIGNED_BYTE;
+  const pixel = new Uint8Array([0, 0, 255, 255]);  // opaque blue
+  gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+                width, height, border, srcFormat, srcType,
+                pixel);
 
-    const d = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
+  const image = new Image();
+  image.onload = function() {
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+                  srcFormat, srcType, image);
 
-    dst[0] = d * t0;
-    dst[1] = d * t1;
-    dst[2] = d * t2;
-    dst[3] = d * t3;
-    dst[4] = d * ((tmp_1 * m10 + tmp_2 * m20 + tmp_5 * m30) - (tmp_0 * m10 + tmp_3 * m20 + tmp_4 * m30));
-    dst[5] = d * ((tmp_0 * m00 + tmp_7 * m20 + tmp_8 * m30) - (tmp_1 * m00 + tmp_6 * m20 + tmp_9 * m30));
-    dst[6] = d * ((tmp_3 * m00 + tmp_6 * m10 + tmp_11 * m30) - (tmp_2 * m00 + tmp_7 * m10 + tmp_10 * m30));
-    dst[7] = d * ((tmp_4 * m00 + tmp_9 * m10 + tmp_10 * m20) - (tmp_5 * m00 + tmp_8 * m10 + tmp_11 * m20));
-    dst[8] = d * ((tmp_12 * m13 + tmp_15 * m23 + tmp_16 * m33) - (tmp_13 * m13 + tmp_14 * m23 + tmp_17 * m33));
-    dst[9] = d * ((tmp_13 * m03 + tmp_18 * m23 + tmp_21 * m33) - (tmp_12 * m03 + tmp_19 * m23 + tmp_20 * m33));
-    dst[10] = d * ((tmp_14 * m03 + tmp_19 * m13 + tmp_22 * m33) - (tmp_15 * m03 + tmp_18 * m13 + tmp_23 * m33));
-    dst[11] = d * ((tmp_17 * m03 + tmp_20 * m13 + tmp_23 * m23) - (tmp_16 * m03 + tmp_21 * m13 + tmp_22 * m23));
-    dst[12] = d * ((tmp_14 * m22 + tmp_17 * m32 + tmp_13 * m12) - (tmp_16 * m32 + tmp_12 * m12 + tmp_15 * m22));
-    dst[13] = d * ((tmp_20 * m32 + tmp_12 * m02 + tmp_19 * m22) - (tmp_18 * m22 + tmp_21 * m32 + tmp_13 * m02));
-    dst[14] = d * ((tmp_18 * m12 + tmp_23 * m32 + tmp_15 * m02) - (tmp_22 * m32 + tmp_14 * m02 + tmp_19 * m12));
-    dst[15] = d * ((tmp_22 * m22 + tmp_16 * m02 + tmp_21 * m12) - (tmp_20 * m12 + tmp_23 * m22 + tmp_17 * m02));
+    // WebGL1 has different requirements for power of 2 images
+    // vs non power of 2 images so check if the image is a
+    // power of 2 in both dimensions.
+    if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+       // Yes, it's a power of 2. Generate mips.
+       gl.generateMipmap(gl.TEXTURE_2D);
+    } else {
+       // No, it's not a power of 2. Turn of mips and set
+       // wrapping to clamp to edge
+       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    }
+  };
+  image.src = url;
 
-    return dst;
-  }
+  return texture;
+}
+
+function isPowerOf2(value: number) {
+  return (value & (value - 1)) == 0;
+}
