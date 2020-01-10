@@ -44,8 +44,7 @@ export function get_position_grid_n_by_n(n: number): PositionAndIndices {
 
 export function get_grid_normals(n: number, y_vals: number[]): number[] {
     const points_per_row = n + 1;
-    const graph_layout_width = 2;
-    const square_size = graph_layout_width / n;
+    const square_size = 1 / n;
     const return_var = new Array(3 * points_per_row * points_per_row); //This is much faster than creating an array by [] and then pushing into it.  https://jsperf.com/array-init-kk/19
 
     for (let z = 0; z < points_per_row; z++) {
@@ -221,27 +220,35 @@ export function get_projection_and_normals_for_3d_in_2d_layout(
     const finalProjectionMatrix = mat4.create();
     mat4.perspective(finalProjectionMatrix, FIELD_OF_VIEW_Y, aspect, Z_NEAR, Z_FAR);
 
+    const rotationMatrix = getRotationMatrix(rotation_angle_x_axis, rotation_angle_y_axis);
     const modelViewMatrix = mat4.create();
+
     mat4.translate(modelViewMatrix, modelViewMatrix, [
         -aspect + (use_scale / 2) + aspect * 2 * (left / canvas_width),
         -1 + (use_scale / 2) + 2 * (bottom / canvas_height),
         Z_PLANE,
     ]);
-    mat4.rotate(modelViewMatrix, modelViewMatrix, rotation_angle_x_axis, [1, 0, 0]);
-    mat4.rotate(modelViewMatrix, modelViewMatrix, rotation_angle_y_axis, [0, 1, 0]);
+    mat4.multiply(modelViewMatrix, modelViewMatrix, rotationMatrix);
     mat4.scale(modelViewMatrix, modelViewMatrix, [use_scale ,use_scale, use_scale]);
     mat4.translate(modelViewMatrix, modelViewMatrix, [-0.5, -0.5, -0.5]);
-
     mat4.multiply(finalProjectionMatrix, finalProjectionMatrix, modelViewMatrix);
 
     const normalMatrix = mat4.create();
-    mat4.invert(normalMatrix, modelViewMatrix);
+    mat4.invert(normalMatrix, rotationMatrix);
     mat4.transpose(normalMatrix, normalMatrix);
 
     return { 
         projection:  finalProjectionMatrix,
         normals: normalMatrix
     };
+}
+
+function getRotationMatrix(rotation_angle_x_axis: number, rotation_angle_y_axis: number): mat4 {
+    const returnVar = mat4.create();
+    mat4.rotate(returnVar, returnVar, rotation_angle_y_axis, [0, 1, 0]);
+    mat4.rotate(returnVar, returnVar, rotation_angle_x_axis, [1, 0, 0]);
+
+    return returnVar;
 }
 
 export function loadTexture(gl: WebGLRenderingContext, url: string) {
